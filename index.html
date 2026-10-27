@@ -8,8 +8,8 @@
   <link rel="icon" href="/chess-next-move/icons/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/chess-next-move/icons/icon-192.png" />
   <meta name="theme-color" content="#2b2a27" />
-  <script type="module" crossorigin src="/chess-next-move/assets/index-Bxzzd_HP.js"></script>
-  <link rel="stylesheet" crossorigin href="/chess-next-move/assets/index-DPEd9SCf.css">
+  <script type="module" crossorigin src="/chess-next-move/assets/index-Dsl1jw5j.js"></script>
+  <link rel="stylesheet" crossorigin href="/chess-next-move/assets/index-DMxllLfT.css">
 </head>
 <body>
   <div id="app">
@@ -29,6 +29,7 @@
         <div class="cc-row">
           <button id="btn-chesscom" data-i18n="cc.btn" data-i18n-title="cc.title"></button>
           <button id="btn-cc-sync" data-i18n-title="cc.syncNow" hidden>🔄</button>
+          <button id="btn-puzzle" data-i18n="pz.btn" data-i18n-title="pz.title"></button>
         </div>
         <div id="cc-sync-status"></div>
       </div>
@@ -144,6 +145,20 @@
         <p class="hint legend" data-i18n="arrow.legend"></p>
       </div>
 
+      <!-- Opening Explorer + Endgame Tablebase (ข้อมูลจาก lichess) -->
+      <div class="panel only-analysis" id="panel-explorer">
+        <div class="panel-head">
+          <h2 data-i18n="xp.title"></h2>
+          <label class="switch"><input type="checkbox" id="explorer-on" /> <span data-i18n="xp.on"></span></label>
+        </div>
+        <div class="xp-tabs" id="xp-tabs">
+          <button data-db="masters" data-i18n="xp.masters"></button>
+          <button data-db="lichess" data-i18n="xp.lichess"></button>
+          <button data-db="tablebase" data-i18n="xp.tb"></button>
+        </div>
+        <div id="explorer-body"></div>
+      </div>
+
       <div class="panel only-analysis" id="panel-plan">
         <div class="panel-head">
           <h2 data-i18n="plan.title"></h2>
@@ -230,6 +245,7 @@
   <dialog id="dlg-chesscom">
     <div class="cc-wrap">
       <h3 data-i18n="cc.title"></h3>
+      <div class="cc-sites" id="cc-sites"><button type="button" data-site="chess.com">♟ chess.com</button><button type="button" data-site="lichess">♞ lichess</button></div>
       <p class="hint" data-i18n="cc.hint"></p>
       <div class="field">
         <span data-i18n="cc.user"></span>
@@ -238,8 +254,8 @@
       </div>
       <div id="cc-status" class="hint"></div>
       <div id="cc-list"></div>
-      <label class="cc-auto"><input type="checkbox" id="cc-auto" /> <span data-i18n="cc.auto"></span></label>
-      <p class="hint" data-i18n="cc.liveNote"></p>
+      <label class="cc-auto" id="cc-auto-row"><input type="checkbox" id="cc-auto" /> <span data-i18n="cc.auto"></span></label>
+      <p class="hint" id="cc-note"></p>
       <menu>
         <button id="cc-close" type="button" data-i18n="cc.close"></button>
         <button id="cc-import" type="button" class="primary" disabled></button>
@@ -270,6 +286,7 @@
         </select>
       </label>
       <label class="set-row"><span data-i18n="set.coords"></span><input type="checkbox" id="set-coords" /></label>
+      <div class="set-row"><span data-i18n="set.lichess"></span><span id="set-li-status"></span><button type="button" id="set-li-btn"></button></div>
       <menu><button id="set-close" type="button" class="primary" data-i18n="cc.close"></button></menu>
     </div>
   </dialog>

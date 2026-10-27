@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess Next Move Planner</title>
+  <link rel="manifest" href="/chess-next-move/store/manifest.webmanifest" />
+  <link rel="icon" href="/chess-next-move/store/icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/chess-next-move/store/icons/icon-192.png" />
+  <meta name="theme-color" content="#2b2a27" />
+  <script type="module" crossorigin src="/chess-next-move/store/assets/index-Dbwy4Ev9.js"></script>
+  <link rel="stylesheet" crossorigin href="/chess-next-move/store/assets/index-DMxllLfT.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ซ้าย: รายการกระดานที่เซฟไว้ -->
+    <aside id="sidebar">
+      <div class="side-head">
+        <div class="brand-row">
+          <h1>♞ Next Move</h1>
+          <div class="brand-tools">
+            <div class="lang-toggle" data-i18n-title="app.lang">
+              <button data-lang="th">TH</button><button data-lang="en">EN</button>
+            </div>
+            <button id="btn-settings" data-i18n-title="set.title">⚙</button>
+          </div>
+        </div>
+        <button id="btn-new" class="primary" data-i18n="app.new" data-i18n-title="app.newTitle"></button>
+        <div class="cc-row">
+          <button id="btn-chesscom" data-i18n="cc.btn" data-i18n-title="cc.title"></button>
+          <button id="btn-cc-sync" data-i18n-title="cc.syncNow" hidden>🔄</button>
+          <button id="btn-puzzle" data-i18n="pz.btn" data-i18n-title="pz.title"></button>
+        </div>
+        <div id="cc-sync-status"></div>
+      </div>
+      <button id="btn-boards" class="mobile-only"></button>
+      <ul id="game-list"></ul>
+      <div class="side-foot">
+        <button id="btn-export-all" data-i18n="app.export" data-i18n-title="app.exportTitle"></button>
+        <label class="btn" data-i18n-title="app.importTitle"><span data-i18n="app.import"></span><input id="file-import" type="file" accept=".json" hidden /></label>
+      </div>
+      <div id="backup-status"></div>
+    </aside>
+
+    <!-- กลาง: กระดาน -->
+    <main id="center">
+      <div class="game-title">
+        <span id="mode-badge"></span>
+        <input id="game-name" spellcheck="false" />
+        <select id="my-color" class="only-analysis" data-i18n-title="color.mineTitle">
+          <option value="w" data-i18n="color.iw"></option>
+          <option value="b" data-i18n="color.ib"></option>
+        </select>
+        <a id="cc-link" class="btn" target="_blank" rel="noopener" hidden data-i18n="cc.openSite"></a>
+      </div>
+      <div id="game-meta"></div>
+      <div class="clock-row" id="clock-top" hidden></div>
+      <div class="board-wrap">
+        <div id="evalbar"><div id="evalfill"></div><span id="evaltext">0.0</span></div>
+        <div class="board-col">
+          <div class="spare cg-wrap" id="spare-top" hidden></div>
+          <div id="board-box">
+            <div id="board"></div>
+            <!-- ป้ายจบเกมกลางกระดาน -->
+            <div id="board-overlay" hidden>
+              <div class="ov-card">
+                <button class="ov-close" title="✕">✕</button>
+                <div class="ov-icon"></div>
+                <div class="ov-title"></div>
+                <div class="ov-sub"></div>
+              </div>
+            </div>
+          </div>
+          <div class="spare cg-wrap" id="spare-bottom" hidden></div>
+        </div>
+      </div>
+      <div class="clock-row" id="clock-bottom" hidden></div>
+      <div id="plan-alert" hidden></div>
+      <div class="toolbar">
+        <div class="turn-toggle only-analysis" data-i18n-title="turn.title">
+          <button data-turn="w" data-i18n="turn.w"></button><button data-turn="b" data-i18n="turn.b"></button>
+        </div>
+        <button id="btn-start" data-i18n-title="tb.start">⏮</button>
+        <button id="btn-back" data-i18n-title="tb.back">◀</button>
+        <button id="btn-fwd" data-i18n-title="tb.fwd">▶</button>
+        <button id="btn-end" data-i18n-title="tb.end">⏭</button>
+        <button id="btn-flip" data-i18n-title="tb.flip">⇅</button>
+        <button id="btn-undo" class="only-analysis" data-i18n="tb.undo" data-i18n-title="tb.undoTitle"></button>
+        <button id="btn-reset" class="only-analysis" data-i18n="tb.reset" data-i18n-title="tb.resetTitle"></button>
+        <button id="btn-clear" class="only-analysis" data-i18n="tb.clear" data-i18n-title="tb.clearTitle"></button>
+        <button id="btn-editor" class="only-analysis" data-i18n="tb.editor" data-i18n-title="tb.editorTitle"></button>
+        <button id="btn-fen" data-i18n="tb.fen" data-i18n-title="tb.fenTitle"></button>
+      </div>
+    </main>
+
+    <!-- ขวา: โหมด + เอนจิน + แผน -->
+    <section id="right">
+      <!-- โหมดจัดหมาก -->
+      <div id="editor" class="panel" hidden>
+        <div class="panel-head"><h2 data-i18n="ed.title"></h2></div>
+        <div class="editor-row">
+          <span class="ed-label" data-i18n="ed.turn"></span>
+          <label><input type="radio" name="ed-turn" value="w" checked /> <span data-i18n="ed.wTurn"></span></label>
+          <label><input type="radio" name="ed-turn" value="b" /> <span data-i18n="ed.bTurn"></span></label>
+        </div>
+        <div class="editor-row">
+          <span class="ed-label">Castling</span>
+          <label><input type="checkbox" id="ed-K" checked /> <span data-i18n="ed.wOO"></span></label>
+          <label><input type="checkbox" id="ed-Q" checked /> <span data-i18n="ed.wOOO"></span></label>
+          <label><input type="checkbox" id="ed-k" checked /> <span data-i18n="ed.bOO"></span></label>
+          <label><input type="checkbox" id="ed-q" checked /> <span data-i18n="ed.bOOO"></span></label>
+        </div>
+        <div class="editor-row">
+          <button id="ed-start" data-i18n="ed.start"></button>
+          <button id="ed-clear" data-i18n="ed.clear"></button>
+          <button id="ed-flip" data-i18n="ed.flip"></button>
+        </div>
+        <div class="editor-row">
+          <span class="ed-label">FEN</span>
+          <input id="ed-fen" spellcheck="false" />
+        </div>
+        <div class="editor-row">
+          <button id="ed-done" class="primary" data-i18n="ed.done"></button>
+          <button id="ed-cancel" data-i18n="ed.cancel"></button>
+        </div>
+        <p class="hint" data-i18n="ed.hint"></p>
+      </div>
+
+      <!-- แผงของแต่ละโหมด (Auto Pilot / บอท / เพื่อน) -->
+      <div id="mode-panel" class="panel"></div>
+
+      <div class="panel" id="panel-engine">
+        <div class="panel-head">
+          <h2 data-i18n="eng.title"></h2>
+          <label class="switch"><input type="checkbox" id="engine-on" checked /> <span data-i18n="eng.on"></span></label>
+        </div>
+        <div class="engine-opts">
+          <select id="opt-engine"></select>
+          <label>Lines <select id="opt-multipv"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></label>
+          <label>Depth <select id="opt-depth"><option>14</option><option>18</option><option selected>22</option><option>26</option><option value="0">∞</option></select></label>
+          <span id="engine-status"></span>
+        </div>
+        <div id="lines"></div>
+        <div id="explain-box"></div>
+        <p class="hint legend" data-i18n="arrow.legend"></p>
+      </div>
+
+      <!-- Opening Explorer + Endgame Tablebase (ข้อมูลจาก lichess) -->
+      <div class="panel only-analysis" id="panel-explorer">
+        <div class="panel-head">
+          <h2 data-i18n="xp.title"></h2>
+          <label class="switch"><input type="checkbox" id="explorer-on" /> <span data-i18n="xp.on"></span></label>
+        </div>
+        <div class="xp-tabs" id="xp-tabs">
+          <button data-db="masters" data-i18n="xp.masters"></button>
+          <button data-db="lichess" data-i18n="xp.lichess"></button>
+          <button data-db="tablebase" data-i18n="xp.tb"></button>
+        </div>
+        <div id="explorer-body"></div>
+      </div>
+
+      <div class="panel only-analysis" id="panel-plan">
+        <div class="panel-head">
+          <h2 data-i18n="plan.title"></h2>
+        </div>
+        <div class="engine-opts">
+          <label data-i18n-title="plan.aheadTitle"><span data-i18n="plan.ahead"></span> <select id="plan-depth"><option value="1"></option><option value="2" selected></option><option value="3"></option><option value="4"></option></select></label>
+          <label data-i18n-title="plan.widthTitle"><span data-i18n="plan.width"></span> <select id="plan-width"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+          <label data-i18n-title="plan.qualityTitle"><span data-i18n="plan.quality"></span> <select id="plan-quality"><option value="12" data-i18n="plan.fast"></option><option value="16" selected data-i18n="plan.mid"></option><option value="20" data-i18n="plan.deep"></option></select></label>
+        </div>
+        <div class="plan-actions">
+          <button id="btn-plan" class="primary" data-i18n="plan.create"></button>
+          <button id="btn-plan-stop" hidden data-i18n="plan.stop"></button>
+          <button id="btn-plan-clear" data-i18n="plan.clear"></button>
+        </div>
+        <div id="plan-progress"></div>
+        <div id="plan-tree"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2 data-i18n="mv.title"></h2></div>
+        <div id="moves"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- กล่อง FEN/PGN -->
+  <dialog id="dlg-fen">
+    <form method="dialog">
+      <h3 data-i18n="fen.title"></h3>
+      <p class="hint" data-i18n="fen.hint"></p>
+      <textarea id="fen-input" rows="6" spellcheck="false"></textarea>
+      <p class="hint"><span data-i18n="fen.current"></span> <code id="fen-current"></code> <button type="button" id="btn-copy-fen" data-i18n="fen.copy"></button></p>
+      <p class="hint"><span data-i18n="fen.pgn"></span> <button type="button" id="btn-copy-pgn" data-i18n="fen.copyPgn"></button></p>
+      <menu>
+        <button value="cancel" data-i18n="fen.cancel"></button>
+        <button id="btn-fen-load" value="load" class="primary" data-i18n="fen.load"></button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- กล่องสร้างกระดานใหม่ -->
+  <dialog id="dlg-new">
+    <form method="dialog" id="new-form">
+      <h3 data-i18n="new.title"></h3>
+      <label class="field"><span data-i18n="new.name"></span><input id="new-name" data-i18n-ph="new.namePh" /></label>
+      <div class="mode-cards">
+        <label class="mode-card"><input type="radio" name="new-mode" value="analysis" checked />
+          <b data-i18n="mode.analysis"></b><small data-i18n="mode.analysisDesc"></small></label>
+        <label class="mode-card"><input type="radio" name="new-mode" value="bot" />
+          <b data-i18n="mode.bot"></b><small data-i18n="mode.botDesc"></small></label>
+        <label class="mode-card"><input type="radio" name="new-mode" value="friend" />
+          <b data-i18n="mode.friend"></b><small data-i18n="mode.friendDesc"></small></label>
+      </div>
+      <div class="new-opts" data-for="analysis bot">
+        <span data-i18n="new.myColor"></span>
+        <label><input type="radio" name="new-color" value="w" checked /> <span data-i18n="color.w"></span></label>
+        <label><input type="radio" name="new-color" value="b" /> <span data-i18n="color.b"></span></label>
+        <label class="only-new-bot"><input type="radio" name="new-color" value="r" /> <span data-i18n="color.random"></span></label>
+      </div>
+      <div class="new-opts" data-for="bot">
+        <span data-i18n="new.level"></span>
+        <select id="new-level"></select>
+      </div>
+      <div class="new-opts" data-for="friend">
+        <span data-i18n="new.time"></span>
+        <select id="new-time">
+          <option value="" data-i18n="new.noClock"></option>
+          <option value="3+2">3 + 2</option>
+          <option value="5+0">5 + 0</option>
+          <option value="10+0" selected>10 + 0</option>
+          <option value="15+10">15 + 10</option>
+          <option value="30+0">30 + 0</option>
+        </select>
+        <label><input type="checkbox" id="new-flip" checked /> <span data-i18n="new.autoFlip"></span></label>
+      </div>
+      <menu>
+        <button value="cancel" data-i18n="new.cancel"></button>
+        <button value="create" class="primary" data-i18n="new.create"></button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- ดึงเกมจาก chess.com -->
+  <dialog id="dlg-chesscom">
+    <div class="cc-wrap">
+      <h3 data-i18n="cc.title"></h3>
+      <div class="cc-sites" id="cc-sites"><button type="button" data-site="chess.com">♟ chess.com</button><button type="button" data-site="lichess">♞ lichess</button></div>
+      <p class="hint" data-i18n="cc.hint"></p>
+      <div class="field">
+        <span data-i18n="cc.user"></span>
+        <input id="cc-user" spellcheck="false" autocomplete="off" data-i18n-ph="cc.userPh" />
+        <button id="cc-fetch" type="button" class="primary" data-i18n="cc.fetch"></button>
+      </div>
+      <div id="cc-status" class="hint"></div>
+      <div id="cc-list"></div>
+      <label class="cc-auto" id="cc-auto-row"><input type="checkbox" id="cc-auto" /> <span data-i18n="cc.auto"></span></label>
+      <p class="hint" id="cc-note"></p>
+      <menu>
+        <button id="cc-close" type="button" data-i18n="cc.close"></button>
+        <button id="cc-import" type="button" class="primary" disabled></button>
+      </menu>
+    </div>
+  </dialog>
+
+  <!-- ตั้งค่า -->
+  <dialog id="dlg-settings">
+    <div class="set-wrap">
+      <h3 data-i18n="set.title"></h3>
+      <label class="set-row"><span data-i18n="set.sound"></span>
+        <select id="set-volume">
+          <option value="0" data-i18n="set.off"></option>
+          <option value="0.35" data-i18n="set.quiet"></option>
+          <option value="0.7" data-i18n="set.normal"></option>
+          <option value="1" data-i18n="set.loud"></option>
+        </select>
+        <button id="set-test-sound" type="button">🔊</button>
+      </label>
+      <div class="set-row"><span data-i18n="set.theme"></span><div id="set-themes"></div></div>
+      <label class="set-row"><span data-i18n="set.anim"></span>
+        <select id="set-anim">
+          <option value="0" data-i18n="set.off"></option>
+          <option value="150" data-i18n="set.fast"></option>
+          <option value="280" data-i18n="set.normal"></option>
+          <option value="450" data-i18n="set.slow"></option>
+        </select>
+      </label>
+      <label class="set-row"><span data-i18n="set.coords"></span><input type="checkbox" id="set-coords" /></label>
+      <div class="set-row"><span data-i18n="set.lichess"></span><span id="set-li-status"></span><button type="button" id="set-li-btn"></button></div>
+      <menu><button id="set-close" type="button" class="primary" data-i18n="cc.close"></button></menu>
+    </div>
+  </dialog>
+
+  <div id="toast" hidden></div>
+
+  <dialog id="dlg-promo">
+    <div id="promo-choices"></div>
+  </dialog>
+
+</body>
+</html>
