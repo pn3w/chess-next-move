@@ -8,8 +8,8 @@
   <link rel="icon" href="/chess-next-move/icons/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/chess-next-move/icons/icon-192.png" />
   <meta name="theme-color" content="#2b2a27" />
-  <script type="module" crossorigin src="/chess-next-move/assets/index-Dsl1jw5j.js"></script>
-  <link rel="stylesheet" crossorigin href="/chess-next-move/assets/index-DMxllLfT.css">
+  <script type="module" crossorigin src="/chess-next-move/assets/index-lWrlsEUt.js"></script>
+  <link rel="stylesheet" crossorigin href="/chess-next-move/assets/index-BOsjgadF.css">
 </head>
 <body>
   <div id="app">
@@ -52,8 +52,10 @@
           <option value="b" data-i18n="color.ib"></option>
         </select>
         <a id="cc-link" class="btn" target="_blank" rel="noopener" hidden data-i18n="cc.openSite"></a>
+        <button id="btn-save" data-i18n="sv.btn" data-i18n-title="sv.btnTip"></button>
+        <button id="btn-save-as" data-i18n-title="sv.asTip">📑</button>
       </div>
-      <div id="game-meta"></div>
+      <div class="meta-row"><span id="game-meta"></span><span id="save-state"></span></div>
       <div class="clock-row" id="clock-top" hidden></div>
       <div class="board-wrap">
         <div id="evalbar"><div id="evalfill"></div><span id="evaltext">0.0</span></div>
